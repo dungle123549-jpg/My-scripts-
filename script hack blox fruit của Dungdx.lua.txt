@@ -1,0 +1,1967 @@
+-- ============================================================
+-- BLOX FRUIT SCRIPT - BLOX COMMUNITY VN EDITION
+-- Tác giả: Dungdx
+-- Discord: Blox Community VN
+-- Link: https://discord.gg/BQwcUEdWCW
+-- Yêu cầu: Executor hỗ trợ hookfunction, getupvalue, setupvalue
+-- ============================================================
+
+-- ==================== SERVICES ====================
+local Services = setmetatable({}, {__index = function(self, name)
+    local ok, service = pcall(game.GetService, game, name)
+    if ok and service then
+        rawset(self, name, service)
+        return service
+    end
+    return nil
+end})
+
+local Players = Services.Players
+local RunService = Services.RunService
+local ReplicatedStorage = Services.ReplicatedStorage
+local Workspace = Services.Workspace
+local VirtualUser = Services.VirtualUser
+local VirtualInputManager = Services.VirtualInputManager
+local HttpService = Services.HttpService
+local Lighting = Services.Lighting
+local StarterGui = Services.StarterGui
+local CollectionService = Services.CollectionService
+local TeleportService = Services.TeleportService
+local UserInputService = Services.UserInputService
+
+-- ==================== PLAYER REFS ====================
+local LP = Players.LocalPlayer
+local Character = LP.Character or LP.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid", 10)
+local Root = Character:WaitForChild("HumanoidRootPart", 10)
+local Backpack = LP:WaitForChild("Backpack")
+local PlayerGui = LP:WaitForChild("PlayerGui")
+local Data = LP:WaitForChild("Data")
+local Level = Data:WaitForChild("Level")
+local Beli = Data:WaitForChild("Beli")
+local Fragments = Data:WaitForChild("Fragments")
+
+-- ==================== GAME REFS ====================
+local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+local CommF = Remotes:WaitForChild("CommF_")
+local CommE = Remotes:FindFirstChild("CommE")
+local Modules = ReplicatedStorage:WaitForChild("Modules")
+local Net = Modules:WaitForChild("Net")
+local Util = ReplicatedStorage:WaitForChild("Util")
+local ItemConfig = ReplicatedStorage:WaitForChild("ItemConfig")
+local Enemies = Workspace:WaitForChild("Enemies")
+local SeaBeasts = Workspace:WaitForChild("SeaBeasts")
+local Boats = Workspace:WaitForChild("Boats")
+local Map = Workspace:FindFirstChild("Map")
+local WorldOrigin = Workspace:FindFirstChild("_WorldOrigin")
+
+-- ==================== CHARACTER UPDATES ====================
+LP.CharacterAdded:Connect(function(newChar)
+    Character = newChar
+    Humanoid = newChar:WaitForChild("Humanoid", 10)
+    Root = newChar:WaitForChild("HumanoidRootPart", 10)
+end)
+
+-- ==================== CONFIG ====================
+local Config = {
+    AutoFarmLevel = false,
+    AutoFarmBones = false,
+    AutoFarmMaterial = false,
+    AutoFarmBoss = false,
+    AutoFarmChest = false,
+    AutoFarmElite = false,
+    AutoFarmFactory = false,
+    AutoFarmPirateRaid = false,
+    AutoSoulReaper = false,
+    AutoRaid = false,
+    AutoDungeon = false,
+    AutoSeaEvents = false,
+    AutoFish = false,
+    AutoFishSlap = false,
+    AutoCakePrince = false,
+    AutoDoughKing = false,
+    AutoDarkbeard = false,
+    AutoGreybeard = false,
+    AutoCursedCaptain = false,
+    AutoRipIndra = false,
+    AutoTyrant = false,
+    AutoObservation = false,
+    AutoKenV2 = false,
+    AutoCDK = false,
+    AutoTushita = false,
+    AutoYama = false,
+    AutoTTK = false,
+    AutoSkullGuitar = false,
+    AutoSharkAnchor = false,
+    AutoSaber = false,
+    AutoBartilo = false,
+    AutoCitizen = false,
+    AutoRainbowHaki = false,
+    AutoDBV2 = false,
+    AutoGhoulRace = false,
+    AutoCyborgRace = false,
+    AutoRaceV2 = false,
+    AutoRaceV3 = false,
+    AutoRaceV4 = false,
+    AutoFinishTrial = false,
+    AutoTrainGear = false,
+    AutoLever = false,
+    AutoChooseGear = false,
+    AutoDeathStep = false,
+    AutoSharkmanKarate = false,
+    AutoElectricClaw = false,
+    AutoDragonTalon = false,
+    AutoFindMirage = false,
+    AutoFindKitsune = false,
+    AutoFindPrehistoric = false,
+    AutoFindLeviatan = false,
+    AutoKillLeviatan = false,
+    AutoBlueMoon = false,
+    AutoCollectBones = false,
+    AutoCollectEgg = false,
+    AutoVolcanic = false,
+    AutoBlazeEmber = false,
+    AutoFireFlowers = false,
+    AutoWhiteBelt = false,
+    AutoPurpleBelt = false,
+    AutoBerry = false,
+    AutoBoat = false,
+    AutoBoatNew = false,
+    AutoBoatProtect = false,
+    AutoDodgeTerror = false,
+    AutoDodgeSea = false,
+    AutoChestHop = false,
+    AutoStoreFruit = false,
+    AutoRandomFruit = false,
+    AutoBuyFruit = false,
+    AutoCraftScroll = false,
+    AutoAwaken = false,
+    AutoStats = false,
+    AutoSkills = false,
+    AutoHaki = false,
+    AutoObservationHaki = false,
+    AutoXray = false,
+    InfiniteZoom = false,
+    FarmMode = "Quest",
+    QuestFarmMode = "Double Quest",
+    SelectWeapon = "Melee",
+    SelectBoss = "Greybeard",
+    SelectMaterial = "Leather",
+    SelectRaid = "Flame",
+    SelectBoat = "PirateBrigade",
+    SelectRod = "Fishing Rod",
+    SelectBait = "Basic Bait",
+    SelectTrain = "Bones",
+    TweenSpeed = 250,
+    BringMonster = true,
+    BringRadius = 350,
+    AttackMobs = true,
+    AttackPlayers = false,
+    FastAttack = true,
+    AutoHakiAlways = true,
+    Webhook = "",
+    WebhookEnabled = false,
+    WebhookPingId = "",
+    FastAttackDelay = 0,
+    AttackDelay = 0.3,
+    HealthMob = 25,
+    MasteryFarm = false,
+    ESPPlayer = false,
+    ESPChest = false,
+    ESPFruit = false,
+    ESPIsland = false,
+    ESPBerry = false,
+    ESPBoat = false,
+    AntiAFK = true,
+    HopAdmin = false,
+    AutoFastMode = false,
+    AutoMemory = false,
+    AutoNoFog = false,
+    AutoHop30 = false,
+    HopDelay = 10,
+    SeaLevel = "Level 6",
+    BoatSpeed = 230,
+    BoatHeight = 31,
+    WebhookKitsune = false,
+    WebhookMirage = false,
+    WebhookPrehistoric = false,
+    WebhookLevelUp = false,
+    WebhookRollFruit = false,
+    WebhookStoreFruit = false,
+    WebhookDataLog = false,
+}
+
+-- ==================== UTILITIES ====================
+local Util_Func = {}
+
+function Util_Func.GetRoot(character)
+    if not character then return nil end
+    return character:FindFirstChild("HumanoidRootPart") or character.PrimaryPart
+end
+
+function Util_Func.GetHumanoid(character)
+    if not character then return nil end
+    return character:FindFirstChildOfClass("Humanoid")
+end
+
+function Util_Func.IsAlive(character)
+    if not character or not character.Parent then return false end
+    local h = Util_Func.GetHumanoid(character)
+    return h and h.Health > 0
+end
+
+function Util_Func.IsReady(instance)
+    if not instance or not instance.Parent then return false end
+    if not instance:IsDescendantOf(Workspace) then return false end
+    if instance.Parent == Boats then return false end
+    if instance:GetAttribute("IsBoat") then return false end
+    if instance.Name:find("Boat") or instance.Name:find("Ship") then return false end
+    if instance.Parent == SeaBeasts then
+        local hp = instance:FindFirstChild("Health")
+        return hp and hp.Value > 0
+    end
+    local h = Util_Func.GetHumanoid(instance)
+    local r = Util_Func.GetRoot(instance)
+    return h and h.Health > 0 and r
+end
+
+function Util_Func.Distance(pos1, pos2)
+    if typeof(pos1) == "Instance" then
+        pos1 = Util_Func.GetRoot(pos1) and Util_Func.GetRoot(pos1).Position or pos1.Position
+    elseif typeof(pos1) == "CFrame" then
+        pos1 = pos1.Position
+    end
+    if typeof(pos2) == "Instance" then
+        pos2 = Util_Func.GetRoot(pos2) and Util_Func.GetRoot(pos2).Position or pos2.Position
+    elseif typeof(pos2) == "CFrame" then
+        pos2 = pos2.Position
+    end
+    return (pos1 - pos2).Magnitude
+end
+
+function Util_Func.FireInvoke(...)
+    return CommF:InvokeServer(...)
+end
+
+function Util_Func.SendNotify(title, text, duration)
+    pcall(function()
+        StarterGui:SetCore("SendNotification", {
+            Title = title or "Script",
+            Text = text or "",
+            Duration = duration or 5,
+        })
+    end)
+end
+
+function Util_Func.GetEquippedTool()
+    return Character and Character:FindFirstChildOfClass("Tool")
+end
+
+function Util_Func.EquipTool(toolName)
+    if not Backpack or not Humanoid then return end
+    local tool = Backpack:FindFirstChild(toolName) or Character:FindFirstChild(toolName)
+    if tool then
+        Humanoid:EquipTool(tool)
+        return true
+    end
+    return false
+end
+
+function Util_Func.EquipWeapon(weaponType)
+    if not Backpack or not Humanoid then return end
+    for _, tool in ipairs(Backpack:GetChildren()) do
+        if tool:IsA("Tool") and (not weaponType or tool.ToolTip == weaponType) then
+            Humanoid:EquipTool(tool)
+            return true
+        end
+    end
+    for _, tool in ipairs(Character:GetChildren()) do
+        if tool:IsA("Tool") and (not weaponType or tool.ToolTip == weaponType) then
+            return true
+        end
+    end
+    return false
+end
+
+function Util_Func.AutoHaki()
+    if not Character then return end
+    if not Character:HasTag("Buso") then
+        if Beli.Value >= 25000 then
+            Util_Func.FireInvoke("BuyHaki", "Buso")
+        end
+    elseif not Character:FindFirstChild("HasBuso") then
+        Util_Func.FireInvoke("Buso")
+    end
+end
+
+function Util_Func.HasQuest()
+    local main = PlayerGui:FindFirstChild("Main")
+    local quest = main and main:FindFirstChild("Quest")
+    return quest and quest.Visible
+end
+
+function Util_Func.GetQuestMob()
+    local main = PlayerGui:FindFirstChild("Main")
+    local quest = main and main:FindFirstChild("Quest")
+    if not quest or not quest.Visible then return nil end
+    local container = quest:FindFirstChild("Container")
+    local title = container and container:FindFirstChild("QuestTitle") and container.QuestTitle:FindFirstChild("Title")
+    if title and title.Text ~= "" then
+        local mob = title.Text:match("Defeat%s+%d+%s+(.-)%s+%(") or title.Text:match("Defeat%s+(.-)%s+%(")
+        if mob then return mob end
+    end
+    return nil
+end
+
+function Util_Func.CheckInventory(category, name)
+    local ok, result = pcall(function()
+        return Net:RemoteFunction("GetAllItemValues"):InvokeServer()
+    end)
+    if not ok or not result then return nil end
+    local grouped = {}
+    for _, v in next, result, nil do
+        local key = tostring(v.ItemId) .. "_" .. tostring(v.NetworkedUID)
+        grouped[key] = grouped[key] or {ItemId = v.ItemId, Attributes = {}}
+        if v.Value ~= nil then
+            grouped[key].Attributes[v.Key] = v.Value
+        end
+    end
+    for _, item in next, grouped, nil do
+        local ok2, res2 = pcall(function()
+            return ItemConfig.match(item.ItemId)
+        end)
+        if ok2 and res2 and res2.isOk and res2:isOk() then
+            local idx = res2:unwrap()
+            if idx and idx.Index and idx.Index.DebugLabel then
+                local label = tostring(idx.Index.DebugLabel)
+                local match = label:match("^(.-)%s*%[") or label
+                if match:lower() == name:lower() then
+                    if category == "Material" then
+                        return item.Attributes.Quantity or 0
+                    elseif category == "Moveset" then
+                        return item.Attributes.Mastery or 0
+                    end
+                end
+            end
+        end
+    end
+    return category == "Material" and 0 or nil
+end
+
+function Util_Func.HasTool(toolName)
+    if Character and Character:FindFirstChild(toolName) then return true end
+    if Backpack and Backpack:FindFirstChild(toolName) then return true end
+    return false
+end
+
+-- ==================== TWEEN MANAGER ====================
+local TweenManager = {}
+TweenManager._Active = false
+TweenManager._Cancel = false
+
+function TweenManager.Stop()
+    TweenManager._Cancel = true
+    TweenManager._Active = false
+end
+
+function TweenManager.Teleport(cframe, speed)
+    if not Root or not Root.Parent then return end
+    if typeof(cframe) == "Vector3" then cframe = CFrame.new(cframe) end
+    TweenManager._Cancel = false
+    TweenManager._Active = true
+    local start = Root.CFrame
+    local distance = (cframe.Position - start.Position).Magnitude
+    if distance <= 5 then
+        TweenManager._Active = false
+        return
+    end
+    speed = speed or Config.TweenSpeed
+    local startTime = tick()
+    local duration = distance / speed
+    while tick() - startTime < duration do
+        if TweenManager._Cancel or not Root or not Root.Parent then break end
+        if not Humanoid or Humanoid.Health <= 0 then break end
+        local alpha = math.min((tick() - startTime) / duration, 1)
+        Root.CFrame = start:Lerp(cframe, alpha)
+        RunService.Heartbeat:Wait()
+    end
+    if Root and Root.Parent then
+        Root.CFrame = cframe
+    end
+    TweenManager._Active = false
+end
+
+function TweenManager.TeleportTask(cframe, speed)
+    task.spawn(function()
+        TweenManager.Teleport(cframe, speed)
+    end)
+end
+
+-- ==================== FAST ATTACK SYSTEM ====================
+local FastAttack = {}
+FastAttack._Enabled = Config.FastAttack
+FastAttack._LastAttack = 0
+
+pcall(function()
+    local CombatUtil = require(ReplicatedStorage:WaitForChild("Modules"):WaitForChild("CombatUtil"))
+    if CombatUtil and CombatUtil.CanAttack and hookfunction then
+        hookfunction(CombatUtil.CanAttack, function()
+            return true
+        end)
+    end
+end)
+
+local CombatController = nil
+local reRegisterAttack = nil
+local reShootGunEvent = nil
+local validator2 = nil
+
+pcall(function()
+    CombatController = require(ReplicatedStorage.Controllers.CombatController)
+    reRegisterAttack = Net:WaitForChild("RE/RegisterAttack")
+    reShootGunEvent = Net:FindFirstChild("RE/ShootGunEvent")
+    validator2 = Remotes:FindFirstChild("Validator2")
+end)
+
+FastAttack.GetHits = function(radius)
+    radius = radius or 500
+    local hits = {}
+    local myRoot = Util_Func.GetRoot(Character)
+    if not myRoot then return hits end
+    
+    if Config.AttackMobs then
+        for _, enemy in ipairs(Enemies:GetChildren()) do
+            if Util_Func.IsReady(enemy) then
+                local eRoot = Util_Func.GetRoot(enemy)
+                if eRoot then
+                    local dist = (eRoot.Position - myRoot.Position).Magnitude
+                    if dist <= radius then
+                        table.insert(hits, {enemy, eRoot, dist})
+                    end
+                end
+            end
+        end
+    end
+    
+    if Config.AttackPlayers then
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= LP and Util_Func.IsAlive(player.Character) then
+                if not (player.Team and LP.Team and player.Team == LP.Team) then
+                    local pRoot = Util_Func.GetRoot(player.Character)
+                    if pRoot then
+                        local dist = (pRoot.Position - myRoot.Position).Magnitude
+                        if dist <= radius then
+                            table.insert(hits, {player.Character, pRoot, dist})
+                        end
+                    end
+                end
+            end
+        end
+    end
+    
+    table.sort(hits, function(a, b) return a[3] < b[3] end)
+    local result = {}
+    for i = 1, math.min(#hits, 5) do
+        result[i] = {hits[i][1], hits[i][2]}
+    end
+    return result
+end
+
+FastAttack.Attack = function()
+    if not Character or not Humanoid or Humanoid.Health <= 0 then return end
+    local tool = Util_Func.GetEquippedTool()
+    if not tool then
+        Util_Func.EquipWeapon(Config.SelectWeapon)
+        tool = Util_Func.GetEquippedTool()
+        if not tool then return end
+    end
+    
+    if tool.ToolTip == "Gun" then
+        FastAttack.ShootGun()
+        return
+    end
+    
+    local hits = FastAttack.GetHits(500)
+    if #hits == 0 then return end
+    
+    if reRegisterAttack then
+        pcall(function()
+            reRegisterAttack:FireServer(Config.FastAttackDelay or 0.3)
+        end)
+    end
+    
+    if tool:FindFirstChild("LeftClickRemote") then
+        pcall(function()
+            tool.LeftClickRemote:FireServer(Vector3.new(0.01, -500, 0.01), 1, true)
+        end)
+    end
+end
+
+FastAttack.ShootGun = function(target)
+    local tool = Util_Func.GetEquippedTool()
+    if not tool or tool.ToolTip ~= "Gun" then return end
+    if not tool.Enabled then return end
+    tool.Enabled = true
+    tool:SetAttribute("IsReloading_Client", false)
+    tool:SetAttribute("LocalShotsLeft", 100)
+    
+    local targetPos
+    if target then
+        targetPos = Util_Func.GetRoot(target).Position
+    else
+        local hits = FastAttack.GetHits(500)
+        if #hits == 0 then return end
+        targetPos = hits[1][2].Position
+    end
+    
+    pcall(function()
+        if tool:FindFirstChild("RemoteEvent") then
+            tool.RemoteEvent:FireServer("TAP", targetPos)
+        elseif reShootGunEvent then
+            reShootGunEvent:FireServer(targetPos, {})
+        end
+    end)
+end
+
+-- ==================== ESP SYSTEM ====================
+local ESP = {}
+ESP._Cache = setmetatable({}, {__mode = "k"})
+
+function ESP.Clear(category)
+    for instance, data in pairs(ESP._Cache) do
+        if not category or data.Category == category then
+            if data.Billboard and data.Billboard.Parent then
+                data.Billboard:Destroy()
+            end
+            ESP._Cache[instance] = nil
+        end
+    end
+end
+
+function ESP.Add(adornee, text, color, category)
+    if not adornee or ESP._Cache[adornee] then return end
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "DungdxESP"
+    billboard.Adornee = adornee
+    billboard.Size = UDim2.new(0, 200, 0, 50)
+    billboard.StudsOffset = Vector3.new(0, 3, 0)
+    billboard.AlwaysOnTop = true
+    billboard.MaxDistance = 5000
+    billboard.Parent = adornee
+    
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.TextColor3 = color or Color3.fromRGB(255, 255, 255)
+    label.TextStrokeTransparency = 0.3
+    label.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    label.TextSize = 13
+    label.Font = Enum.Font.GothamBold
+    label.RichText = true
+    label.Text = text or ""
+    label.Parent = billboard
+    
+    ESP._Cache[adornee] = {Billboard = billboard, Category = category, Label = label}
+end
+
+function ESP.Update()
+    if Config.ESPPlayer then
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= LP and Util_Func.IsAlive(player.Character) then
+                local head = player.Character:FindFirstChild("Head")
+                if head and not ESP._Cache[head] then
+                    local level = player:FindFirstChild("Data") and player.Data:FindFirstChild("Level")
+                    local lvl = level and level.Value or "?"
+                    ESP.Add(head, string.format("<b>%s</b> [Lv.%s]", player.Name, lvl), Color3.fromRGB(255, 100, 100), "Player")
+                end
+            end
+        end
+    else
+        ESP.Clear("Player")
+    end
+    
+    if Config.ESPChest then
+        local chestModels = Workspace:FindFirstChild("ChestModels")
+        if chestModels then
+            for _, chest in ipairs(chestModels:GetChildren()) do
+                local root = chest:FindFirstChild("RootPart")
+                if root and not ESP._Cache[root] then
+                    local name = chest.Name:lower()
+                    local color = Color3.fromRGB(255, 255, 255)
+                    local label = "Chest"
+                    if name:find("silver") then color = Color3.fromRGB(200, 200, 220); label = "Silver"
+                    elseif name:find("gold") then color = Color3.fromRGB(255, 215, 0); label = "Gold"
+                    elseif name:find("diamond") then color = Color3.fromRGB(0, 220, 255); label = "Diamond" end
+                    ESP.Add(root, label, color, "Chest")
+                end
+            end
+        end
+    else
+        ESP.Clear("Chest")
+    end
+    
+    if Config.ESPFruit then
+        for _, obj in ipairs(Workspace:GetChildren()) do
+            if obj:IsA("Model") and obj.Name:find("Fruit") then
+                local handle = obj:FindFirstChild("Handle") or obj.PrimaryPart
+                if handle and not ESP._Cache[handle] then
+                    ESP.Add(handle, obj.Name, Color3.fromRGB(255, 170, 0), "Fruit")
+                end
+            end
+        end
+    else
+        ESP.Clear("Fruit")
+    end
+    
+    if Config.ESPIsland then
+        local locations = WorldOrigin and WorldOrigin:FindFirstChild("Locations")
+        if locations then
+            for _, loc in ipairs(locations:GetChildren()) do
+                if loc:IsA("BasePart") and loc.Name ~= "Sea" and not ESP._Cache[loc] then
+                    ESP.Add(loc, loc.Name, Color3.fromRGB(100, 200, 255), "Island")
+                end
+            end
+        end
+    else
+        ESP.Clear("Island")
+    end
+end
+
+-- ==================== AUTO FUNCTIONS ====================
+local Functions = {}
+
+Functions.AutoFarmLevel = function()
+    while Config.AutoFarmLevel do
+        task.wait(0.15)
+        if not Util_Func.IsAlive(Character) then
+            task.wait(1)
+            continue
+        end
+        local mob = Util_Func.GetQuestMob()
+        local hasQuest = Util_Func.HasQuest()
+        local farmMode = Config.FarmMode
+        
+        if farmMode == "Quest" then
+            if not hasQuest then
+                if mob then
+                    local npcs = ReplicatedStorage:FindFirstChild("NPCs")
+                    if npcs then
+                        for _, npc in ipairs(npcs:GetChildren()) do
+                            if npc.Name:lower():find(mob:lower()) then
+                                local npcRoot = Util_Func.GetRoot(npc) or npc:FindFirstChildWhichIsA("BasePart")
+                                if npcRoot then
+                                    TweenManager.Teleport(npcRoot.CFrame)
+                                    task.wait(0.3)
+                                    Util_Func.FireInvoke("StartQuest", "Quest", 1)
+                                end
+                                break
+                            end
+                        end
+                    end
+                end
+                task.wait(0.5)
+            else
+                local found = false
+                for _, enemy in ipairs(Enemies:GetChildren()) do
+                    if Util_Func.IsReady(enemy) and enemy.Name:lower():find(mob:lower()) then
+                        local eRoot = Util_Func.GetRoot(enemy)
+                        if eRoot then
+                            Util_Func.AutoHaki()
+                            Util_Func.EquipWeapon(Config.SelectWeapon)
+                            TweenManager.Teleport(eRoot.CFrame * CFrame.new(0, 15, 0))
+                            if Config.BringMonster then
+                                pcall(function()
+                                    sethiddenproperty(LP, "SimulationRadius", Config.BringRadius)
+                                end)
+                            end
+                            task.wait(0.05)
+                            if FastAttack._Enabled then
+                                FastAttack.Attack()
+                            else
+                                Humanoid:ChangeState(Enum.HumanoidStateType.Attack)
+                            end
+                            found = true
+                        end
+                        break
+                    end
+                end
+                if not found then
+                    local spawnFolder = ReplicatedStorage:FindFirstChild("FortBuilderReplicatedSpawnPositionsFolder")
+                    if spawnFolder then
+                        for _, part in ipairs(spawnFolder:GetChildren()) do
+                            if part.Name == mob then
+                                TweenManager.Teleport(part.CFrame + Vector3.new(0, 15, 0))
+                                break
+                            end
+                        end
+                    end
+                end
+            end
+        elseif farmMode == "No Quest" or farmMode == "Nearest" then
+            local nearest, minDist = nil, 500
+            local myRoot = Util_Func.GetRoot(Character)
+            for _, enemy in ipairs(Enemies:GetChildren()) do
+                if Util_Func.IsReady(enemy) then
+                    local eRoot = Util_Func.GetRoot(enemy)
+                    if eRoot then
+                        local dist = (eRoot.Position - myRoot.Position).Magnitude
+                        if dist < minDist then
+                            minDist = dist
+                            nearest = enemy
+                        end
+                    end
+                end
+            end
+            if nearest then
+                local eRoot = Util_Func.GetRoot(nearest)
+                Util_Func.AutoHaki()
+                Util_Func.EquipWeapon(Config.SelectWeapon)
+                TweenManager.Teleport(eRoot.CFrame * CFrame.new(0, 15, 0))
+                task.wait(0.05)
+                if FastAttack._Enabled then
+                    FastAttack.Attack()
+                else
+                    Humanoid:ChangeState(Enum.HumanoidStateType.Attack)
+                end
+            end
+        end
+    end
+end
+
+Functions.AutoFarmBones = function()
+    local bonesList = {"Reborn Skeleton", "Living Zombie", "Demonic Soul", "Posessed Mummy"}
+    while Config.AutoFarmBones do
+        task.wait(0.3)
+        if not Util_Func.IsAlive(Character) then continue end
+        local nearest, minDist = nil, 500
+        local myRoot = Util_Func.GetRoot(Character)
+        for _, enemy in ipairs(Enemies:GetChildren()) do
+            if Util_Func.IsReady(enemy) then
+                for _, name in ipairs(bonesList) do
+                    if enemy.Name == name then
+                        local eRoot = Util_Func.GetRoot(enemy)
+                        if eRoot then
+                            local dist = (eRoot.Position - myRoot.Position).Magnitude
+                            if dist < minDist then
+                                minDist = dist
+                                nearest = enemy
+                            end
+                        end
+                        break
+                    end
+                end
+            end
+        end
+        if nearest then
+            local eRoot = Util_Func.GetRoot(nearest)
+            Util_Func.AutoHaki()
+            Util_Func.EquipWeapon(Config.SelectWeapon)
+            TweenManager.Teleport(eRoot.CFrame * CFrame.new(0, 15, 0))
+            task.wait(0.05)
+            FastAttack.Attack()
+        end
+    end
+end
+
+Functions.AutoFarmMaterial = function()
+    while Config.AutoFarmMaterial do
+        task.wait(0.3)
+        if not Util_Func.IsAlive(Character) then continue end
+        local mat = Config.SelectMaterial
+        local nearest, minDist = nil, 500
+        local myRoot = Util_Func.GetRoot(Character)
+        for _, enemy in ipairs(Enemies:GetChildren()) do
+            if Util_Func.IsReady(enemy) then
+                if enemy.Name:lower():find(mat:lower()) or mat:lower():find(enemy.Name:lower()) then
+                    local eRoot = Util_Func.GetRoot(enemy)
+                    if eRoot then
+                        local dist = (eRoot.Position - myRoot.Position).Magnitude
+                        if dist < minDist then
+                            minDist = dist
+                            nearest = enemy
+                        end
+                    end
+                end
+            end
+        end
+        if nearest then
+            local eRoot = Util_Func.GetRoot(nearest)
+            Util_Func.AutoHaki()
+            Util_Func.EquipWeapon(Config.SelectWeapon)
+            TweenManager.Teleport(eRoot.CFrame * CFrame.new(0, 15, 0))
+            task.wait(0.05)
+            FastAttack.Attack()
+        end
+    end
+end
+
+Functions.AutoFarmBoss = function()
+    while Config.AutoFarmBoss do
+        task.wait(0.5)
+        if not Util_Func.IsAlive(Character) then continue end
+        local bossName = Config.SelectBoss
+        local found = false
+        for _, enemy in ipairs(Enemies:GetChildren()) do
+            if Util_Func.IsReady(enemy) and enemy.Name == bossName then
+                local eRoot = Util_Func.GetRoot(enemy)
+                if eRoot then
+                    Util_Func.AutoHaki()
+                    Util_Func.EquipWeapon(Config.SelectWeapon)
+                    TweenManager.Teleport(eRoot.CFrame * CFrame.new(0, 15, 0))
+                    task.wait(0.05)
+                    FastAttack.Attack()
+                    found = true
+                end
+                break
+            end
+        end
+        if not found then
+            task.wait(1)
+        end
+    end
+end
+
+Functions.AutoChest = function()
+    while Config.AutoFarmChest do
+        task.wait(0.3)
+        if not Util_Func.IsAlive(Character) then continue end
+        local chestModels = Workspace:FindFirstChild("ChestModels")
+        if not chestModels then continue end
+        local nearest, minDist = nil, 800
+        local myRoot = Util_Func.GetRoot(Character)
+        for _, chest in ipairs(chestModels:GetChildren()) do
+            local root = chest:FindFirstChild("RootPart")
+            if root then
+                local dist = (root.Position - myRoot.Position).Magnitude
+                if dist < minDist then
+                    minDist = dist
+                    nearest = root
+                end
+            end
+        end
+        if nearest then
+            TweenManager.Teleport(nearest.CFrame * CFrame.new(0, 3, 0))
+            task.wait(0.1)
+        end
+    end
+end
+
+Functions.AutoElite = function()
+    while Config.AutoFarmElite do
+        task.wait(0.5)
+        if not Util_Func.IsAlive(Character) then continue end
+        local elites = {"Urban", "Deandre", "Diablo"}
+        for _, elite in ipairs(elites) do
+            for _, enemy in ipairs(Enemies:GetChildren()) do
+                if Util_Func.IsReady(enemy) and enemy.Name == elite then
+                    local eRoot = Util_Func.GetRoot(enemy)
+                    if eRoot then
+                        Util_Func.AutoHaki()
+                        Util_Func.EquipWeapon(Config.SelectWeapon)
+                        TweenManager.Teleport(eRoot.CFrame * CFrame.new(0, 15, 0))
+                        task.wait(0.05)
+                        FastAttack.Attack()
+                    end
+                    break
+                end
+            end
+        end
+        pcall(function()
+            Util_Func.FireInvoke("EliteHunter")
+        end)
+    end
+end
+
+Functions.AutoRaid = function()
+    while Config.AutoRaid do
+        task.wait(0.5)
+        if not Util_Func.IsAlive(Character) then continue end
+        local main = PlayerGui:FindFirstChild("Main")
+        local topHUD = main and main:FindFirstChild("TopHUDList")
+        local raidTimer = topHUD and topHUD:FindFirstChild("RaidTimer")
+        
+        if raidTimer and raidTimer.Visible then
+            local nearest, minDist = nil, 500
+            local myRoot = Util_Func.GetRoot(Character)
+            for _, enemy in ipairs(Enemies:GetChildren()) do
+                if Util_Func.IsReady(enemy) then
+                    local eRoot = Util_Func.GetRoot(enemy)
+                    if eRoot then
+                        local dist = (eRoot.Position - myRoot.Position).Magnitude
+                        if dist < minDist then
+                            minDist = dist
+                            nearest = enemy
+                        end
+                    end
+                end
+            end
+            if nearest then
+                local eRoot = Util_Func.GetRoot(nearest)
+                Util_Func.AutoHaki()
+                Util_Func.EquipWeapon(Config.SelectWeapon)
+                TweenManager.Teleport(eRoot.CFrame * CFrame.new(0, 15, 0))
+                FastAttack.Attack()
+            end
+        else
+            local hasChip = Util_Func.HasTool("Special Microchip")
+            if not hasChip then
+                pcall(function()
+                    Util_Func.FireInvoke("RaidsNpc", "Select", Config.SelectRaid)
+                end)
+                task.wait(1)
+            else
+                local circleIsland = Map and Map:FindFirstChild("CircleIsland")
+                local raidSummon = circleIsland and circleIsland:FindFirstChild("RaidSummon2")
+                if raidSummon then
+                    local btn = raidSummon:FindFirstChild("Button")
+                    btn = btn and btn:FindFirstChild("Main")
+                    if btn then
+                        TweenManager.Teleport(btn.CFrame)
+                        task.wait(0.5)
+                        pcall(function()
+                            fireclickdetector(btn.ClickDetector)
+                        end)
+                    end
+                end
+            end
+        end
+    end
+end
+
+Functions.AutoSeaEvents = function()
+    while Config.AutoSeaEvents do
+        task.wait(0.5)
+        if not Util_Func.IsAlive(Character) then continue end
+        local targets = {"Terror Shark", "Sea Beast", "Shark", "Piranha", "Fish Crew Member", "Pirate Brigade", "Pirate Grand Brigade", "Ghost Ship"}
+        local nearest, minDist = nil, 1500
+        local myRoot = Util_Func.GetRoot(Character)
+        
+        for _, sb in ipairs(SeaBeasts:GetChildren()) do
+            if Util_Func.IsReady(sb) then
+                local sRoot = Util_Func.GetRoot(sb) or sb:FindFirstChildWhichIsA("BasePart")
+                if sRoot then
+                    local dist = (sRoot.Position - myRoot.Position).Magnitude
+                    if dist < minDist then
+                        minDist = dist
+                        nearest = sb
+                    end
+                end
+            end
+        end
+        
+        for _, enemy in ipairs(Enemies:GetChildren()) do
+            if Util_Func.IsReady(enemy) then
+                for _, t in ipairs(targets) do
+                    if enemy.Name:find(t) then
+                        local eRoot = Util_Func.GetRoot(enemy) or enemy:FindFirstChild("Engine")
+                        if eRoot then
+                            local dist = (eRoot.Position - myRoot.Position).Magnitude
+                            if dist < minDist then
+                                minDist = dist
+                                nearest = enemy
+                            end
+                        end
+                        break
+                    end
+                end
+            end
+        end
+        
+        if nearest then
+            local nRoot = Util_Func.GetRoot(nearest) or nearest:FindFirstChildWhichIsA("BasePart")
+            if nRoot then
+                local waterY = Map and Map:FindFirstChild("WaterBase-Plane") and Map["WaterBase-Plane"].Position.Y or 0
+                local yOffset = Config.AutoDodgeSea and 400 or 250
+                Util_Func.AutoHaki()
+                Util_Func.EquipWeapon(Config.SelectWeapon)
+                TweenManager.Teleport(CFrame.new(nRoot.Position.X, waterY + yOffset, nRoot.Position.Z))
+                task.wait(0.1)
+                FastAttack.Attack()
+            end
+        end
+    end
+end
+
+Functions.AutoFish = function()
+    while Config.AutoFish do
+        task.wait(0.3)
+        if not Util_Func.IsAlive(Character) then continue end
+        Util_Func.EquipWeapon("Fishing Rod")
+        local rod = Character:FindFirstChild(Config.SelectRod) or Character:FindFirstChild("Fishing Rod")
+        if not rod then
+            task.wait(1)
+            continue
+        end
+        local state = rod:GetAttribute("State")
+        if state == "Biting" then
+            VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 1)
+            task.wait(0.15)
+            VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 1)
+        else
+            VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 1)
+            task.wait(0.5)
+            VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 1)
+        end
+    end
+end
+
+Functions.AutoFishSlap = function()
+    while Config.AutoFishSlap do
+        task.wait(0.05)
+        local minigame = PlayerGui:FindFirstChild("FishSlapMinigame")
+        if minigame and minigame.Enabled then
+            local bar = minigame:FindFirstChild("Bar")
+            local greenZone = bar and bar:FindFirstChild("GreenZone")
+            local tickBar = bar and bar:FindFirstChild("Tick")
+            local slapBtn = minigame:FindFirstChild("SlapButton")
+            if greenZone and tickBar and slapBtn then
+                local tickY = tickBar.AbsolutePosition.Y + tickBar.AbsoluteSize.Y * 0.5
+                local zoneY = greenZone.AbsolutePosition.Y + greenZone.AbsoluteSize.Y * 0.5
+                if math.abs(tickY - zoneY) <= greenZone.AbsoluteSize.Y * 0.45 then
+                    pcall(function()
+                        firesignal(slapBtn.Activated)
+                    end)
+                end
+            end
+        end
+    end
+end
+
+Functions.AutoObservation = function()
+    while Config.AutoObservation do
+        task.wait(0.2)
+        if not Util_Func.IsAlive(Character) then continue end
+        local kenDodges = LP:GetAttribute("KenDodgesLeft") or 0
+        if kenDodges > 1 then
+            pcall(function()
+                if CommE then CommE:FireServer("Ken", true) end
+            end)
+        end
+        local nearest, minDist = nil, 500
+        local myRoot = Util_Func.GetRoot(Character)
+        for _, enemy in ipairs(Enemies:GetChildren()) do
+            if Util_Func.IsReady(enemy) then
+                local eRoot = Util_Func.GetRoot(enemy)
+                if eRoot then
+                    local dist = (eRoot.Position - myRoot.Position).Magnitude
+                    if dist < minDist then
+                        minDist = dist
+                        nearest = eRoot
+                    end
+                end
+            end
+        end
+        if nearest then
+            if kenDodges >= 1 then
+                TweenManager.Teleport(nearest.CFrame * CFrame.new(3, 0, 0))
+            else
+                TweenManager.Teleport(nearest.CFrame * CFrame.new(0, 50, 10))
+            end
+        end
+    end
+end
+
+Functions.AutoBoat = function()
+    while Config.AutoBoat do
+        task.wait(0.5)
+        if not Util_Func.IsAlive(Character) then continue end
+        local myBoat = nil
+        for _, boat in ipairs(Boats:GetChildren()) do
+            local owner = boat:FindFirstChild("Owner")
+            if owner and (owner.Value == LP or tostring(owner.Value) == LP.Name) then
+                myBoat = boat
+                break
+            end
+        end
+        if not myBoat then
+            TweenManager.Teleport(CFrame.new(-16927, 9, 433))
+            task.wait(0.5)
+            pcall(function()
+                Util_Func.FireInvoke("BuyBoat", Config.SelectBoat)
+            end)
+        else
+            local h = Util_Func.GetHumanoid(Character)
+            if h and not h.Sit then
+                local seat = myBoat:FindFirstChildWhichIsA("VehicleSeat") or myBoat:FindFirstChild("VehicleSeat")
+                if seat then
+                    TweenManager.Teleport(seat.CFrame * CFrame.new(0, 3, 0))
+                    task.wait(0.3)
+                end
+            else
+                local seat = myBoat:FindFirstChildWhichIsA("VehicleSeat") or myBoat:FindFirstChild("VehicleSeat")
+                if seat then
+                    local targetPos = Vector3.new(-10000000, 31, 37016)
+                    local dist = (seat.Position - targetPos).Magnitude
+                    if dist > 50 then
+                        local dir = (targetPos - seat.Position).Unit
+                        seat.CFrame = seat.CFrame + dir * 5
+                    end
+                end
+            end
+        end
+    end
+end
+
+Functions.AutoStoreFruit = function()
+    while Config.AutoStoreFruit do
+        task.wait(1)
+        for _, container in ipairs({Backpack, Character}) do
+            if container then
+                for _, tool in ipairs(container:GetChildren()) do
+                    if tool:IsA("Tool") and tool.Name:find("Fruit") then
+                        local fruitName = tool:GetAttribute("OriginalName") or tool.Name:match("^(.-)%-") or tool.Name
+                        pcall(function()
+                            Util_Func.FireInvoke("StoreFruit", fruitName, tool)
+                        end)
+                        task.wait(0.3)
+                    end
+                end
+            end
+        end
+    end
+end
+
+Functions.AutoRandomFruit = function()
+    while Config.AutoRandomFruit do
+        task.wait(1)
+        local check = pcall(function()
+            return Util_Func.FireInvoke("Cousin", "CheckTime", "DLCBoxData")
+        end)
+        if check then
+            pcall(function()
+                Util_Func.FireInvoke("Cousin", "DLCBoxData")
+            end)
+        end
+        local spinner = PlayerGui:FindFirstChild("SpinnerWindow")
+        if spinner then
+            local above = spinner:FindFirstChild("AboveSpinner")
+            local nav = above and above:FindFirstChild("Navigation")
+            local closeBtn = nav and nav:FindFirstChild("CloseButton")
+            if closeBtn and closeBtn.Visible then
+                pcall(function()
+                    firesignal(closeBtn.Activated)
+                end)
+            end
+        end
+    end
+end
+
+Functions.AutoAwaken = function()
+    while Config.AutoAwaken do
+        task.wait(0.5)
+        pcall(function()
+            Util_Func.FireInvoke("Awakener", "Check")
+            Util_Func.FireInvoke("Awakener", "Awaken")
+        end)
+    end
+end
+
+Functions.AutoStats = function()
+    while Config.AutoStats do
+        task.wait(0.3)
+        local points = Data:FindFirstChild("Points")
+        if points and points.Value > 0 then
+            for _, stat in ipairs({"Melee", "Defense", "Sword", "Gun", "Demon Fruit"}) do
+                if Config["Stat" .. stat] then
+                    pcall(function()
+                        Util_Func.FireInvoke("AddPoint", stat, points.Value)
+                    end)
+                end
+            end
+        end
+    end
+end
+
+Functions.AutoSkills = function()
+    while Config.AutoSkills do
+        task.wait(0.05)
+        if not Util_Func.IsAlive(Character) then continue end
+        for _, key in ipairs({"Z", "X", "C", "V", "F"}) do
+            if not Config.AutoSkills then break end
+            pcall(function()
+                VirtualInputManager:SendKeyEvent(true, Enum.KeyCode[key], false, game)
+                task.wait(0.03)
+                VirtualInputManager:SendKeyEvent(false, Enum.KeyCode[key], false, game)
+            end)
+            task.wait(0.08)
+        end
+    end
+end
+
+Functions.AutoHakiLoop = function()
+    while Config.AutoHaki do
+        task.wait(0.5)
+        pcall(function()
+            Util_Func.AutoHaki()
+        end)
+    end
+end
+
+Functions.AutoObservationHaki = function()
+    while Config.AutoObservationHaki do
+        task.wait(0.5)
+        pcall(function()
+            if CommE then CommE:FireServer("Ken", true) end
+        end)
+    end
+end
+
+Functions.AutoAntiAFK = function()
+    while Config.AntiAFK do
+        task.wait(300)
+        pcall(function()
+            VirtualUser:CaptureController()
+            VirtualUser:ClickButton1(Vector2.new(0, 0))
+        end)
+    end
+end
+
+Functions.AutoNoFog = function()
+    while Config.AutoNoFog do
+        task.wait(2)
+        pcall(function()
+            Lighting.FogEnd = math.huge
+            local sky = Lighting:FindFirstChildOfClass("Sky")
+            if sky then sky:Destroy() end
+        end)
+    end
+end
+
+Functions.AutoMemory = function()
+    while Config.AutoMemory do
+        task.wait(60)
+        pcall(function()
+            if collectgarbage then
+                collectgarbage("step", 200)
+            end
+        end)
+    end
+end
+
+Functions.AutoHop30 = function()
+    while Config.AutoHop30 do
+        task.wait(1800)
+        pcall(function()
+            if ReplicatedStorage:FindFirstChild("__ServerBrowser") then
+                ReplicatedStorage.__ServerBrowser:InvokeServer("teleport")
+            end
+        end)
+    end
+end
+
+-- ==================== WEBHOOK ====================
+local Webhook = {}
+
+Webhook.Send = function(data)
+    if not Config.WebhookEnabled or Config.Webhook == "" then return end
+    if not Config.Webhook:find("http") then return end
+    task.spawn(function()
+        pcall(function()
+            local body = HttpService:JSONEncode(data)
+            local req = request or http_request or (syn and syn.request)
+            if req then
+                req({
+                    Url = Config.Webhook,
+                    Method = "POST",
+                    Headers = {["Content-Type"] = "application/json"},
+                    Body = body
+                })
+            end
+        end)
+    end)
+end
+
+Webhook.SendSimple = function(title, content, color)
+    Webhook.Send({
+        embeds = {{
+            title = title,
+            description = content,
+            color = color or 3066993,
+            timestamp = DateTime.now():ToIsoDate(),
+            footer = {text = "Blox Community VN | " .. LP.Name}
+        }}
+    })
+end
+
+-- ==================== UI LIBRARY ====================
+local UI = {}
+UI.__index = UI
+
+function UI.CreateWindow(title)
+    local self = setmetatable({}, UI)
+    
+    local ScreenGui = Instance.new("ScreenGui")
+    ScreenGui.Name = "DungdxBloxFruitUI"
+    ScreenGui.ResetOnSpawn = false
+    ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    ScreenGui.Parent = PlayerGui
+    
+    local MainFrame = Instance.new("Frame")
+    MainFrame.Name = "MainFrame"
+    MainFrame.Size = UDim2.new(0, 560, 0, 420)
+    MainFrame.Position = UDim2.new(0.5, -280, 0.5, -210)
+    MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
+    MainFrame.BorderSizePixel = 0
+    MainFrame.Parent = ScreenGui
+    
+    Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
+    
+    local Stroke = Instance.new("UIStroke", MainFrame)
+    Stroke.Color = Color3.fromRGB(80, 80, 120)
+    Stroke.Thickness = 1.5
+    
+    local TitleBar = Instance.new("Frame")
+    TitleBar.Name = "TitleBar"
+    TitleBar.Size = UDim2.new(1, 0, 0, 36)
+    TitleBar.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
+    TitleBar.BorderSizePixel = 0
+    TitleBar.Parent = MainFrame
+    Instance.new("UICorner", TitleBar).CornerRadius = UDim.new(0, 10)
+    
+    local TitleLabel = Instance.new("TextLabel")
+    TitleLabel.Size = UDim2.new(1, -80, 1, 0)
+    TitleLabel.Position = UDim2.new(0, 15, 0, 0)
+    TitleLabel.BackgroundTransparency = 1
+    TitleLabel.Text = title or "Blox Fruit Script | Dungdx"
+    TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    TitleLabel.Font = Enum.Font.GothamBold
+    TitleLabel.TextSize = 14
+    TitleLabel.Parent = TitleBar
+    
+    local Minimize = Instance.new("TextButton")
+    Minimize.Size = UDim2.new(0, 30, 0, 26)
+    Minimize.Position = UDim2.new(1, -70, 0, 5)
+    Minimize.BackgroundColor3 = Color3.fromRGB(80, 80, 130)
+    Minimize.Text = "-"
+    Minimize.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Minimize.Font = Enum.Font.GothamBold
+    Minimize.TextSize = 18
+    Minimize.Parent = TitleBar
+    Instance.new("UICorner", Minimize).CornerRadius = UDim.new(0, 5)
+    
+    local Close = Instance.new("TextButton")
+    Close.Size = UDim2.new(0, 30, 0, 26)
+    Close.Position = UDim2.new(1, -36, 0, 5)
+    Close.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
+    Close.Text = "X"
+    Close.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Close.Font = Enum.Font.GothamBold
+    Close.TextSize = 14
+    Close.Parent = TitleBar
+    Instance.new("UICorner", Close).CornerRadius = UDim.new(0, 5)
+    
+    local TabBar = Instance.new("Frame")
+    TabBar.Name = "TabBar"
+    TabBar.Size = UDim2.new(0, 130, 1, -40)
+    TabBar.Position = UDim2.new(0, 5, 0, 38)
+    TabBar.BackgroundColor3 = Color3.fromRGB(28, 28, 40)
+    TabBar.BorderSizePixel = 0
+    TabBar.Parent = MainFrame
+    Instance.new("UICorner", TabBar).CornerRadius = UDim.new(0, 8)
+    
+    local TabList = Instance.new("UIListLayout")
+    TabList.Padding = UDim.new(0, 4)
+    TabList.SortOrder = Enum.SortOrder.LayoutOrder
+    TabList.Parent = TabBar
+    
+    local TabPadding = Instance.new("UIPadding")
+    TabPadding.PaddingTop = UDim.new(0, 8)
+    TabPadding.PaddingLeft = UDim.new(0, 6)
+    TabPadding.PaddingRight = UDim.new(0, 6)
+    TabPadding.Parent = TabBar
+    
+    local ContentFrame = Instance.new("Frame")
+    ContentFrame.Name = "Content"
+    ContentFrame.Size = UDim2.new(1, -145, 1, -45)
+    ContentFrame.Position = UDim2.new(0, 140, 0, 40)
+    ContentFrame.BackgroundTransparency = 1
+    ContentFrame.Parent = MainFrame
+    
+    -- Discord info bar
+    local InfoBar = Instance.new("TextLabel")
+    InfoBar.Size = UDim2.new(1, -20, 0, 18)
+    InfoBar.Position = UDim2.new(0, 10, 1, -22)
+    InfoBar.BackgroundTransparency = 1
+    InfoBar.Text = "Discord: Blox Community VN | discord.gg/BQwcUEdWCW"
+    InfoBar.TextColor3 = Color3.fromRGB(130, 150, 255)
+    InfoBar.Font = Enum.Font.Gotham
+    InfoBar.TextSize = 11
+    InfoBar.Parent = MainFrame
+    
+    self.ScreenGui = ScreenGui
+    self.MainFrame = MainFrame
+    self.TabBar = TabBar
+    self.ContentFrame = ContentFrame
+    self.Tabs = {}
+    self.ActiveTab = nil
+    
+    local dragging, dragStart, startPos
+    TitleBar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = MainFrame.Position
+        end
+    end)
+    TitleBar.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = input.Position - dragStart
+            MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+    
+    Close.MouseButton1Click:Connect(function()
+        ScreenGui:Destroy()
+    end)
+    
+    local minimized = false
+    Minimize.MouseButton1Click:Connect(function()
+        minimized = not minimized
+        MainFrame.Size = minimized and UDim2.new(0, 560, 0, 36) or UDim2.new(0, 560, 0, 420)
+    end)
+    
+    return self
+end
+
+function UI:AddTab(name, icon)
+    local Tab = Instance.new("TextButton")
+    Tab.Size = UDim2.new(1, -12, 0, 32)
+    Tab.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+    Tab.Text = name
+    Tab.TextColor3 = Color3.fromRGB(200, 200, 220)
+    Tab.Font = Enum.Font.Gotham
+    Tab.TextSize = 13
+    Tab.Parent = self.TabBar
+    Instance.new("UICorner", Tab).CornerRadius = UDim.new(0, 6)
+    
+    local Scroll = Instance.new("ScrollingFrame")
+    Scroll.Size = UDim2.new(1, 0, 1, 0)
+    Scroll.BackgroundTransparency = 1
+    Scroll.ScrollBarThickness = 4
+    Scroll.ScrollBarImageColor3 = Color3.fromRGB(100, 100, 150)
+    Scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+    Scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    Scroll.Visible = false
+    Scroll.Parent = self.ContentFrame
+    
+    local Layout = Instance.new("UIListLayout")
+    Layout.Padding = UDim.new(0, 6)
+    Layout.SortOrder = Enum.SortOrder.LayoutOrder
+    Layout.Parent = Scroll
+    
+    local Padding = Instance.new("UIPadding")
+    Padding.PaddingTop = UDim.new(0, 5)
+    Padding.PaddingBottom = UDim.new(0, 5)
+    Padding.PaddingLeft = UDim.new(0, 5)
+    Padding.PaddingRight = UDim.new(0, 5)
+    Padding.Parent = Scroll
+    
+    local tabObj = {Button = Tab, Scroll = Scroll, Layout = Layout}
+    
+    Tab.MouseButton1Click:Connect(function()
+        for _, tab in pairs(self.Tabs) do
+            tab.Button.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+            tab.Button.TextColor3 = Color3.fromRGB(200, 200, 220)
+            tab.Scroll.Visible = false
+        end
+        Tab.BackgroundColor3 = Color3.fromRGB(70, 70, 130)
+        Tab.TextColor3 = Color3.fromRGB(255, 255, 255)
+        Scroll.Visible = true
+    end)
+    
+    table.insert(self.Tabs, tabObj)
+    
+    if #self.Tabs == 1 then
+        Tab.BackgroundColor3 = Color3.fromRGB(70, 70, 130)
+        Tab.TextColor3 = Color3.fromRGB(255, 255, 255)
+        Scroll.Visible = true
+    end
+    
+    tabObj.AddToggle = function(_, label, default, callback)
+        local btn = Instance.new("TextButton")
+        btn.Size = UDim2.new(1, -10, 0, 32)
+        btn.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
+        btn.Text = label .. ": " .. (default and "ON" or "OFF")
+        btn.TextColor3 = Color3.fromRGB(220, 220, 240)
+        btn.Font = Enum.Font.Gotham
+        btn.TextSize = 13
+        btn.Parent = Scroll
+        Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+        
+        local state = default
+        btn.MouseButton1Click:Connect(function()
+            state = not state
+            btn.Text = label .. ": " .. (state and "ON" or "OFF")
+            btn.BackgroundColor3 = state and Color3.fromRGB(0, 140, 80) or Color3.fromRGB(35, 35, 50)
+            if callback then
+                local ok, err = pcall(callback, state)
+                if not ok then warn("[UI Toggle Error] " .. tostring(err)) end
+            end
+        end)
+        return btn
+    end
+    
+    tabObj.AddButton = function(_, label, callback)
+        local btn = Instance.new("TextButton")
+        btn.Size = UDim2.new(1, -10, 0, 32)
+        btn.BackgroundColor3 = Color3.fromRGB(55, 55, 90)
+        btn.Text = label
+        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        btn.Font = Enum.Font.Gotham
+        btn.TextSize = 13
+        btn.Parent = Scroll
+        Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+        btn.MouseButton1Click:Connect(function()
+            if callback then
+                local ok, err = pcall(callback)
+                if not ok then warn("[UI Button Error] " .. tostring(err)) end
+            end
+        end)
+        return btn
+    end
+    
+    tabObj.AddDropdown = function(_, label, options, default, callback)
+        local container = Instance.new("Frame")
+        container.Size = UDim2.new(1, -10, 0, 32)
+        container.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
+        container.Parent = Scroll
+        Instance.new("UICorner", container).CornerRadius = UDim.new(0, 6)
+        
+        local lbl = Instance.new("TextLabel")
+        lbl.Size = UDim2.new(0.4, 0, 1, 0)
+        lbl.Position = UDim2.new(0, 8, 0, 0)
+        lbl.BackgroundTransparency = 1
+        lbl.Text = label
+        lbl.TextColor3 = Color3.fromRGB(220, 220, 240)
+        lbl.TextXAlignment = Enum.TextXAlignment.Left
+        lbl.Font = Enum.Font.Gotham
+        lbl.TextSize = 12
+        lbl.Parent = container
+        
+        local btn = Instance.new("TextButton")
+        btn.Size = UDim2.new(0.55, -8, 0, 24)
+        btn.Position = UDim2.new(0.45, 0, 0, 4)
+        btn.BackgroundColor3 = Color3.fromRGB(60, 60, 90)
+        btn.Text = tostring(default)
+        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        btn.Font = Enum.Font.Gotham
+        btn.TextSize = 12
+        btn.Parent = container
+        Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 4)
+        
+        local open = false
+        local listFrame
+        btn.MouseButton1Click:Connect(function()
+            if open and listFrame then
+                listFrame:Destroy()
+                listFrame = nil
+                open = false
+                return
+            end
+            open = true
+            listFrame = Instance.new("Frame")
+            listFrame.Size = UDim2.new(1, -10, 0, math.min(#options * 26, 200))
+            listFrame.Position = UDim2.new(0, 0, 1, 4)
+            listFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+            listFrame.BorderSizePixel = 0
+            listFrame.ZIndex = 10
+            listFrame.Parent = container
+            Instance.new("UICorner", listFrame).CornerRadius = UDim.new(0, 6)
+            
+            local llist = Instance.new("UIListLayout")
+            llist.Parent = listFrame
+            
+            for _, opt in ipairs(options) do
+                local ob = Instance.new("TextButton")
+                ob.Size = UDim2.new(1, 0, 0, 26)
+                ob.BackgroundColor3 = Color3.fromRGB(55, 55, 80)
+                ob.Text = tostring(opt)
+                ob.TextColor3 = Color3.fromRGB(255, 255, 255)
+                ob.Font = Enum.Font.Gotham
+                ob.TextSize = 12
+                ob.Parent = listFrame
+                ob.MouseButton1Click:Connect(function()
+                    btn.Text = tostring(opt)
+                    if listFrame then listFrame:Destroy() end
+                    listFrame = nil
+                    open = false
+                    if callback then
+                        local ok, err = pcall(callback, opt)
+                        if not ok then warn("[UI Dropdown Error] " .. tostring(err)) end
+                    end
+                end)
+            end
+        end)
+        return btn
+    end
+    
+    tabObj.AddSlider = function(_, label, min, max, default, callback)
+        local container = Instance.new("Frame")
+        container.Size = UDim2.new(1, -10, 0, 46)
+        container.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
+        container.Parent = Scroll
+        Instance.new("UICorner", container).CornerRadius = UDim.new(0, 6)
+        
+        local lbl = Instance.new("TextLabel")
+        lbl.Size = UDim2.new(1, -16, 0, 20)
+        lbl.Position = UDim2.new(0, 8, 0, 4)
+        lbl.BackgroundTransparency = 1
+        lbl.Text = label .. ": " .. tostring(default)
+        lbl.TextColor3 = Color3.fromRGB(220, 220, 240)
+        lbl.TextXAlignment = Enum.TextXAlignment.Left
+        lbl.Font = Enum.Font.Gotham
+        lbl.TextSize = 12
+        lbl.Parent = container
+        
+        local sliderFrame = Instance.new("Frame")
+        sliderFrame.Size = UDim2.new(1, -16, 0, 10)
+        sliderFrame.Position = UDim2.new(0, 8, 0, 28)
+        sliderFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
+        sliderFrame.BorderSizePixel = 0
+        sliderFrame.Parent = container
+        Instance.new("UICorner", sliderFrame).CornerRadius = UDim.new(1, 0)
+        
+        local fill = Instance.new("Frame")
+        fill.Size = UDim2.new((default - min) / math.max(max - min, 1), 0, 1, 0)
+        fill.BackgroundColor3 = Color3.fromRGB(100, 100, 200)
+        fill.BorderSizePixel = 0
+        fill.Parent = sliderFrame
+        Instance.new("UICorner", fill).CornerRadius = UDim.new(1, 0)
+        
+        local dragging2 = false
+        sliderFrame.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                dragging2 = true
+            end
+        end)
+        sliderFrame.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                dragging2 = false
+            end
+        end)
+        UserInputService.InputChanged:Connect(function(input)
+            if dragging2 and input.UserInputType == Enum.UserInputType.MouseMovement then
+                local relX = math.clamp((input.Position.X - sliderFrame.AbsolutePosition.X) / sliderFrame.AbsoluteSize.X, 0, 1)
+                local val = math.floor(min + (max - min) * relX)
+                fill.Size = UDim2.new(relX, 0, 1, 0)
+                lbl.Text = label .. ": " .. val
+                if callback then
+                    local ok, err = pcall(callback, val)
+                    if not ok then warn("[UI Slider Error] " .. tostring(err)) end
+                end
+            end
+        end)
+        return sliderFrame
+    end
+    
+    tabObj.AddLabel = function(_, text)
+        local lbl = Instance.new("TextLabel")
+        lbl.Size = UDim2.new(1, -10, 0, 24)
+        lbl.BackgroundTransparency = 1
+        lbl.Text = text
+        lbl.TextColor3 = Color3.fromRGB(180, 180, 200)
+        lbl.TextXAlignment = Enum.TextXAlignment.Left
+        lbl.Font = Enum.Font.Gotham
+        lbl.TextSize = 12
+        lbl.Parent = Scroll
+        return lbl
+    end
+    
+    tabObj.AddTextBox = function(_, label, callback)
+        local container = Instance.new("Frame")
+        container.Size = UDim2.new(1, -10, 0, 46)
+        container.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
+        container.Parent = Scroll
+        Instance.new("UICorner", container).CornerRadius = UDim.new(0, 6)
+        
+        local lbl = Instance.new("TextLabel")
+        lbl.Size = UDim2.new(1, -16, 0, 18)
+        lbl.Position = UDim2.new(0, 8, 0, 2)
+        lbl.BackgroundTransparency = 1
+        lbl.Text = label
+        lbl.TextColor3 = Color3.fromRGB(200, 200, 220)
+        lbl.TextXAlignment = Enum.TextXAlignment.Left
+        lbl.Font = Enum.Font.Gotham
+        lbl.TextSize = 11
+        lbl.Parent = container
+        
+        local box = Instance.new("TextBox")
+        box.Size = UDim2.new(1, -16, 0, 22)
+        box.Position = UDim2.new(0, 8, 0, 20)
+        box.BackgroundColor3 = Color3.fromRGB(25, 25, 40)
+        box.Text = ""
+        box.PlaceholderText = "Enter..."
+        box.TextColor3 = Color3.fromRGB(255, 255, 255)
+        box.Font = Enum.Font.Gotham
+        box.TextSize = 12
+        box.Parent = container
+        Instance.new("UICorner", box).CornerRadius = UDim.new(0, 4)
+        
+        box.FocusLost:Connect(function()
+            if callback then
+                local ok, err = pcall(callback, box.Text)
+                if not ok then warn("[UI TextBox Error] " .. tostring(err)) end
+            end
+        end)
+        return box
+    end
+    
+    return tabObj
+end
+
+-- ==================== MAIN UI ====================
+local Window = UI.CreateWindow("Blox Fruit | Dungdx | Blox Community VN")
+
+-- Tab 1: Main Farm
+local FarmTab = Window:AddTab("🌾 Farm")
+FarmTab:AddLabel("=== FARM ===")
+FarmTab:AddDropdown("Farm Mode", {"Quest", "No Quest", "Nearest"}, "Quest", function(v) Config.FarmMode = v end)
+FarmTab:AddDropdown("Quest Mode", {"Single Quest", "Double Quest", "Triple Quest"}, "Double Quest", function(v) Config.QuestFarmMode = v end)
+FarmTab:AddDropdown("Weapon", {"Melee", "Sword", "Gun", "Blox Fruit"}, "Melee", function(v) Config.SelectWeapon = v end)
+FarmTab:AddToggle("Auto Farm Level", false, function(v)
+    Config.AutoFarmLevel = v
+    if v then task.spawn(Functions.AutoFarmLevel) end
+end)
+FarmTab:AddToggle("Auto Farm Bones", false, function(v)
+    Config.AutoFarmBones = v
+    if v then task.spawn(Functions.AutoFarmBones) end
+end)
+FarmTab:AddToggle("Mastery Farm", false, function(v) Config.MasteryFarm = v end)
+FarmTab:AddDropdown("Select Material", {"Leather", "Scrap Metal", "Angel Wings", "Magma Ore", "Fish Tail", "Radioactive Material", "Ectoplasm", "Mystic Droplet", "Vampire Fang", "Demonic Wisp", "Conjured Cocoa", "Dragon Scale", "Gunpowder", "Mini Tusk", "Nightmare Catcher"}, "Leather", function(v) Config.SelectMaterial = v end)
+FarmTab:AddToggle("Auto Farm Material", false, function(v)
+    Config.AutoFarmMaterial = v
+    if v then task.spawn(Functions.AutoFarmMaterial) end
+end)
+FarmTab:AddDropdown("Select Boss", {"The Gorilla King", "Chief", "Yeti", "Vice Admiral", "Warden", "Chief Warden", "Swan", "Magma Admiral", "Fishman Lord", "Wysper", "Thunder God", "Cyborg", "Saw", "Diamond", "Jeremy", "Orbitus", "Smoke Admiral", "Awakened Ice Admiral", "Tide Keeper", "Don Swan", "Stone", "Kilo Admiral", "Captain Elephant", "Beautiful Pirate", "Cake Queen"}, "The Gorilla King", function(v) Config.SelectBoss = v end)
+FarmTab:AddToggle("Auto Farm Boss", false, function(v)
+    Config.AutoFarmBoss = v
+    if v then task.spawn(Functions.AutoFarmBoss) end
+end)
+FarmTab:AddToggle("Auto Chest", false, function(v)
+    Config.AutoFarmChest = v
+    if v then task.spawn(Functions.AutoChest) end
+end)
+FarmTab:AddToggle("Auto Elite Hunter", false, function(v)
+    Config.AutoFarmElite = v
+    if v then task.spawn(Functions.AutoElite) end
+end)
+
+-- Tab 2: Raid & Dungeon
+local RaidTab = Window:AddTab("⚔️ Raid")
+RaidTab:AddLabel("=== RAID ===")
+RaidTab:AddDropdown("Select Raid", {"Flame", "Ice", "Quake", "Light", "Dark", "Spider", "Rumble", "Magma", "Buddha", "Sand", "Bird", "Dough", "Shadow", "Venom", "Control", "Spirit", "Dragon", "Kitsune"}, "Flame", function(v) Config.SelectRaid = v end)
+RaidTab:AddToggle("Auto Raid", false, function(v)
+    Config.AutoRaid = v
+    if v then task.spawn(Functions.AutoRaid) end
+end)
+RaidTab:AddToggle("Auto Dungeon", false, function(v)
+    Config.AutoDungeon = v
+end)
+RaidTab:AddLabel("=== FRUIT ===")
+RaidTab:AddToggle("Auto Store Fruit", false, function(v)
+    Config.AutoStoreFruit = v
+    if v then task.spawn(Functions.AutoStoreFruit) end
+end)
+RaidTab:AddToggle("Auto Random Fruit", false, function(v)
+    Config.AutoRandomFruit = v
+    if v then task.spawn(Functions.AutoRandomFruit) end
+end)
+RaidTab:AddToggle("Auto Awaken", false, function(v)
+    Config.AutoAwaken = v
+    if v then task.spawn(Functions.AutoAwaken) end
+end)
+
+-- Tab 3: Sea Events
+local SeaTab = Window:AddTab("🌊 Sea")
+SeaTab:AddLabel("=== SEA ===")
+SeaTab:AddDropdown("Select Boat", {"Dinghy", "PirateSloop", "PirateBrigade", "PirateGrandBrigade", "MarineSloop", "MarineBrigade", "MarineGrandBrigade", "Beast Hunter", "Lantern", "Guardian"}, "PirateBrigade", function(v) Config.SelectBoat = v end)
+SeaTab:AddToggle("Auto Boat", false, function(v)
+    Config.AutoBoat = v
+    if v then task.spawn(Functions.AutoBoat) end
+end)
+SeaTab:AddToggle("Auto Sea Events", false, function(v)
+    Config.AutoSeaEvents = v
+    if v then task.spawn(Functions.AutoSeaEvents) end
+end)
+SeaTab:AddToggle("Auto Dodge Sea Beast", false, function(v) Config.AutoDodgeSea = v end)
+SeaTab:AddSlider("Boat Speed", 50, 250, 230, function(v) Config.BoatSpeed = v end)
+SeaTab:AddSlider("Bring Radius", 100, 500, 350, function(v) Config.BringRadius = v end)
+SeaTab:AddToggle("Bring Monster", true, function(v) Config.BringMonster = v end)
+
+-- Tab 4: Player
+local PlayerTab = Window:AddTab("👤 Player")
+PlayerTab:AddLabel("=== CHARACTER ===")
+PlayerTab:AddToggle("Auto Haki", false, function(v)
+    Config.AutoHaki = v
+    if v then task.spawn(Functions.AutoHakiLoop) end
+end)
+PlayerTab:AddToggle("Auto Ken Haki", false, function(v)
+    Config.AutoObservationHaki = v
+    if v then task.spawn(Functions.AutoObservationHaki) end
+end)
+PlayerTab:AddToggle("Auto Skills", false, function(v)
+    Config.AutoSkills = v
+    if v then task.spawn(Functions.AutoSkills) end
+end)
+PlayerTab:AddToggle("Auto Stats", false, function(v)
+    Config.AutoStats = v
+    if v then task.spawn(Functions.AutoStats) end
+end)
+PlayerTab:AddToggle("Auto Fast Attack", true, function(v) Config.FastAttack = v end)
+PlayerTab:AddToggle("Attack Players", false, function(v) Config.AttackPlayers = v end)
+PlayerTab:AddToggle("Attack Mobs", true, function(v) Config.AttackMobs = v end)
+PlayerTab:AddSlider("Tween Speed", 50, 500, 250, function(v) Config.TweenSpeed = v end)
+PlayerTab:AddLabel("=== MISC ===")
+PlayerTab:AddToggle("Anti AFK", true, function(v)
+    Config.AntiAFK = v
+    if v then task.spawn(Functions.AutoAntiAFK) end
+end)
+PlayerTab:AddToggle("Auto No Fog", false, function(v)
+    Config.AutoNoFog = v
+    if v then task.spawn(Functions.AutoNoFog) end
+end)
+PlayerTab:AddToggle("Auto Memory Clean", false, function(v)
+    Config.AutoMemory = v
+    if v then task.spawn(Functions.AutoMemory) end
+end)
+PlayerTab:AddToggle("Auto Hop 30 Min", false, function(v)
+    Config.AutoHop30 = v
+    if v then task.spawn(Functions.AutoHop30) end
+end)
+
+-- Tab 5: ESP
+local ESPTab = Window:AddTab("👁️ ESP")
+ESPTab:AddLabel("=== ESP ===")
+ESPTab:AddToggle("Player ESP", false, function(v) Config.ESPPlayer = v end)
+ESPTab:AddToggle("Chest ESP", false, function(v) Config.ESPChest = v end)
+ESPTab:AddToggle("Fruit ESP", false, function(v) Config.ESPFruit = v end)
+ESPTab:AddToggle("Island ESP", false, function(v) Config.ESPIsland = v end)
+ESPTab:AddToggle("Berry ESP", false, function(v) Config.ESPBerry = v end)
+ESPTab:AddButton("Clear All ESP", function()
+    ESP.Clear()
+end)
+
+-- Tab 6: Fish
+local FishTab = Window:AddTab("🎣 Fish")
+FishTab:AddLabel("=== FISHING ===")
+FishTab:AddDropdown("Select Rod", {"Fishing Rod", "Gold Rod", "Shark Rod", "Shell Rod", "Treasure Rod"}, "Fishing Rod", function(v) Config.SelectRod = v end)
+FishTab:AddDropdown("Select Bait", {"Basic Bait", "Kelp Bait", "Good Bait", "Abyssal Bait", "Frozen Bait", "Epic Bait", "Carnivore Bait"}, "Basic Bait", function(v) Config.SelectBait = v end)
+FishTab:AddToggle("Auto Fish", false, function(v)
+    Config.AutoFish = v
+    if v then task.spawn(Functions.AutoFish) end
+end)
+FishTab:AddToggle("Auto Fish Slap", false, function(v)
+    Config.AutoFishSlap = v
+    if v then task.spawn(Functions.AutoFishSlap) end
+end)
+
+-- Tab 7: Webhook
+local WebhookTab = Window:AddTab("📡 Webhook")
+WebhookTab:AddLabel("=== WEBHOOK ===")
+WebhookTab:AddTextBox("Webhook URL", function(v) Config.Webhook = v end)
+WebhookTab:AddTextBox("Ping User ID", function(v) Config.WebhookPingId = v end)
+WebhookTab:AddToggle("Enable Webhook", false, function(v) Config.WebhookEnabled = v end)
+WebhookTab:AddToggle("Notify Kitsune", false, function(v) Config.WebhookKitsune = v end)
+WebhookTab:AddToggle("Notify Mirage", false, function(v) Config.WebhookMirage = v end)
+WebhookTab:AddToggle("Notify Level Up", false, function(v) Config.WebhookLevelUp = v end)
+WebhookTab:AddToggle("Notify Roll Fruit", false, function(v) Config.WebhookRollFruit = v end)
+WebhookTab:AddButton("Test Webhook", function()
+    Webhook.SendSimple("Test", "Webhook working!", 3066993)
+end)
+
+-- Tab 8: Teleport
+local TeleportTab = Window:AddTab("🚀 TP")
+TeleportTab:AddButton("Teleport Sea 1", function()
+    pcall(function() Util_Func.FireInvoke("TravelMain") end)
+end)
+TeleportTab:AddButton("Teleport Sea 2", function()
+    pcall(function() Util_Func.FireInvoke("TravelDressrosa") end)
+end)
+TeleportTab:AddButton("Teleport Sea 3", function()
+    pcall(function() Util_Func.FireInvoke("TravelZou") end)
+end)
+TeleportTab:AddButton("Rejoin Server", function()
+    pcall(function()
+        if ReplicatedStorage:FindFirstChild("__ServerBrowser") then
+            ReplicatedStorage.__ServerBrowser:InvokeServer("teleport", game.JobId)
+        end
+    end)
+end)
+TeleportTab:AddButton("Server Hop", function()
+    pcall(function()
+        if ReplicatedStorage:FindFirstChild("__ServerBrowser") then
+            ReplicatedStorage.__ServerBrowser:InvokeServer("teleport")
+        end
+    end)
+end)
+TeleportTab:AddButton("Copy JobID", function()
+    pcall(function()
+        setclipboard(tostring(game.JobId))
+        Util_Func.SendNotify("Copied", "JobID copied to clipboard", 3)
+    end)
+end)
+
+-- Tab 9: Community
+local CommunityTab = Window:AddTab("💬 Community")
+CommunityTab:AddLabel("=== BLOX COMMUNITY VN ===")
+CommunityTab:AddLabel("Tác giả: Dungdx")
+CommunityTab:AddLabel("Discord: Blox Community VN")
+CommunityTab:AddLabel("Link: discord.gg/BQwcUEdWCW")
+CommunityTab:AddButton("Copy Discord Link", function()
+    pcall(function()
+        setclipboard("https://discord.gg/BQwcUEdWCW")
+        Util_Func.SendNotify("Copied", "Discord link copied!", 3)
+    end)
+end)
+CommunityTab:AddButton("Join Discord", function()
+    pcall(function()
+        local req = request or http_request or (syn and syn.request)
+        if req then
+            req({
+                Url = "http://127.0.0.1:6463/rpc?v=1",
+                Method = "POST",
+                Headers = {["Content-Type"] = "application/json", ["Origin"] = "https://discord.com"},
+                Body = HttpService:JSONEncode({
+                    cmd = "INVITE_BROWSER",
+                    args = {code = "BQwcUEdWCW"},
+                    nonce = tostring(math.random(100000, 999999))
+                })
+            })
+        end
+    end)
+end)
+
+-- ==================== MAIN LOOP ====================
+task.spawn(function()
+    while task.wait(0.1) do
+        pcall(function()
+            ESP.Update()
+            if Config.AutoHakiAlways and Character and Character.Parent then
+                Util_Func.AutoHaki()
+            end
+        end)
+    end
+end)
+
+-- ==================== ANNOUNCEMENT ====================
+task.spawn(function()
+    task.wait(1)
+    Util_Func.SendNotify("Blox Community VN", "Script loaded! Author: Dungdx", 6)
+    task.wait(2)
+    Util_Func.SendNotify("Discord Server", "Join: discord.gg/BQwcUEdWCW", 8)
+    task.wait(2)
+    Util_Func.SendNotify("Blox Fruit Script", "Version: Blox Community VN Edition", 6)
+end)
+
+-- Banner console
+print("========================================")
+print("  BLOX FRUIT SCRIPT - Dungdx")
+print("  Discord: Blox Community VN")
+print("  Link: https://discord.gg/BQwcUEdWCW")
+print("========================================")
